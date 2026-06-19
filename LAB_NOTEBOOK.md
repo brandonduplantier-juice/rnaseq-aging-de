@@ -5,7 +5,7 @@ made each choice, and where we are. We bump the version and add a changelog row
 every time we change it, then commit. Git stores the real diffs, this header keeps
 it readable.
 
-Version: v0.2
+Version: v0.3
 Last updated: 2026-06-19
 Owner: Brandon
 
@@ -15,6 +15,7 @@ Owner: Brandon
 |---------|------------|---------------------------------------------------|
 | v0.1    | 2026-06-19 | First notebook. Project scaffolded and tested on synthetic data, not yet run on the real dataset. |
 | v0.2    | 2026-06-19 | Switched dataset to GSE104704 (brain young vs old) after GSE104406 had no GEO-hosted counts. Loader is now self-diagnosing (NCBI counts, then suppl auto-discovery). |
+| v0.3    | 2026-06-19 | First real run. 119 DE genes at padj<0.05 (6 up, 113 down in old). Fixed the shared annotation URL so gene symbols populate, and a print crash on numeric symbols. |
 
 How to update this file: make your edits, bump the version number above, add one
 changelog row, then commit.
@@ -95,22 +96,44 @@ small.
 
 ## 8. Current status
 
-Scaffold built. The DE and plotting steps were tested end to end on synthetic
-counts and behaved correctly (recovered injected differentially expressed genes,
-produced all three figures). Not yet run on the real dataset. Next action: run the
-pipeline and record the first numbers here.
+Ran end to end successfully on 2026-06-19 on GSE104704 (8 young, 10 old; the 12
+Alzheimer's samples were dropped automatically).
 
-Watch items on first run: the loader prints every sample with its parsed group,
-then a "labeled samples: N young, N old" line. Confirm the young and old counts
-look right and that no diseased sample slipped in. If counts cannot be found, it
-prints the available supplementary files so we can point it at the right one.
+Results (old vs young, padj < 0.05):
+- Genes kept after low-count filter: 32,161
+- Genes testable after DESeq2 independent filtering: 6,596
+- Significant: 119 (6 up in old, 113 down in old)
+- Top genes by significance: ZNF488, GPIHBP1, KIF19, HAPLN2, CNDP1, H1-4,
+  GOLIM4, ADGRA3, GPR37, DPYSL5
+
+How to read this: 119 significant genes from an 8-vs-10 brain comparison is a
+reasonable yield. The top hits are brain-expressed genes (myelin and
+oligodendrocyte markers, extracellular-matrix genes, a histone), which is the
+kind of tissue-specific signal a real result should show rather than random noise.
+
+Honest caveat: the significant genes are strongly skewed to down-in-old (113 vs
+6). This can be genuine (broad transcriptional and myelin-program decline is
+reported in aging cortex) or partly technical (a library-composition difference
+that median-of-ratios normalization only partly corrects). The PCA
+(results/pca.png) is the check: clean young/old separation with no single runaway
+outlier points to real signal; one or two dominant samples would point to a
+technical component. The analysis itself is correct either way.
+
+Outputs in results/: de_results.csv, metrics.json, pca.png, volcano.png,
+heatmap.png.
 
 ## 9. Open questions
 
-- How many genes are significant at padj < 0.05, and how many up vs down in old.
-- Do young and old samples separate cleanly in the PCA.
-- Do known aging-associated genes appear among the top hits, and do the
-  significant pathways match what is reported for brain aging.
+Answered by the first run:
+- 119 genes were significant at padj < 0.05, skewed to down-in-old (113 vs 6).
+- The top hits are brain-expressed genes (myelin, oligodendrocyte, ECM, histone),
+  consistent with a real tissue aging signal.
+
+Still open:
+- Does the PCA show clean young/old separation, or is the down-skew driven by an
+  outlier sample.
+- A gene-set enrichment step on the significant genes would name the pathways
+  changing with age (a strong follow-up).
 
 ## 10. Next steps
 
