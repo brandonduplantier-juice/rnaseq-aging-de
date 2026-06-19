@@ -5,7 +5,7 @@ made each choice, and where we are. We bump the version and add a changelog row
 every time we change it, then commit. Git stores the real diffs, this header keeps
 it readable.
 
-Version: v0.1
+Version: v0.2
 Last updated: 2026-06-19
 Owner: Brandon
 
@@ -14,6 +14,7 @@ Owner: Brandon
 | Version | Date       | Change                                            |
 |---------|------------|---------------------------------------------------|
 | v0.1    | 2026-06-19 | First notebook. Project scaffolded and tested on synthetic data, not yet run on the real dataset. |
+| v0.2    | 2026-06-19 | Switched dataset to GSE104704 (brain young vs old) after GSE104406 had no GEO-hosted counts. Loader is now self-diagnosing (NCBI counts, then suppl auto-discovery). |
 
 How to update this file: make your edits, bump the version number above, add one
 changelog row, then commit.
@@ -56,16 +57,18 @@ that shows which genes changed and how strongly, and a heatmap of the top genes.
 
 ## 4. Dataset
 
-GSE104406 (Adelman et al. 2019, Cancer Discovery). FACS-sorted bone-marrow
-hematopoietic stem cells, bulk RNA-seq, 10 young (18 to 30) vs 10 aged (65 to 75).
-Counts are NCBI's uniformly processed gene-level counts, so no alignment is
-needed. Group labels are parsed from the GEO series matrix at runtime.
+GSE104704 (Nativio et al.). Human prefrontal cortex, bulk RNA-seq, healthy young
+vs healthy aged donors, plus an Alzheimer's group the loader drops. We chose this
+after GSE104406 turned out to have no raw-counts matrix hosted on GEO (papers using
+it had to regenerate counts from raw reads with GREIN). Group labels are parsed
+from the GEO series matrix at runtime.
 
 ## 5. Files
 
-- src/download_data.py: downloads the NCBI counts matrix, the gene annotation, and
-  the series metadata; parses young vs old labels; writes counts.csv, meta.csv,
-  gene_map.csv.
+- src/download_data.py: a self-diagnosing GEO loader. It tries NCBI's processed
+  counts first, then auto-discovers a raw-counts file in the series supplementary
+  directory, printing what it finds. Parses young vs old labels from the series
+  matrix and writes counts.csv, meta.csv, gene_map.csv.
 - src/de_analysis.py: runs DESeq2 (old vs young), writes de_results.csv,
   metrics.json, and normalized counts for the plots.
 - src/plots.py: writes pca.png, volcano.png, heatmap.png.
@@ -97,16 +100,17 @@ counts and behaved correctly (recovered injected differentially expressed genes,
 produced all three figures). Not yet run on the real dataset. Next action: run the
 pipeline and record the first numbers here.
 
-Watch items on first run: the download is from NCBI and may be slow; the group
-labels are auto-parsed, so check the printed "labeled samples: N young, N old"
-line reads 10 and 10.
+Watch items on first run: the loader prints every sample with its parsed group,
+then a "labeled samples: N young, N old" line. Confirm the young and old counts
+look right and that no diseased sample slipped in. If counts cannot be found, it
+prints the available supplementary files so we can point it at the right one.
 
 ## 9. Open questions
 
 - How many genes are significant at padj < 0.05, and how many up vs down in old.
 - Do young and old samples separate cleanly in the PCA.
-- Do known HSC-aging genes (for example EGR1, reported up in old in this dataset)
-  appear among the top hits.
+- Do known aging-associated genes appear among the top hits, and do the
+  significant pathways match what is reported for brain aging.
 
 ## 10. Next steps
 

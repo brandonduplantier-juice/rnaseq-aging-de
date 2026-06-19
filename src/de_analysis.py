@@ -80,7 +80,7 @@ def main():
     n_up = int((sig["log2FoldChange"] > 0).sum())
     n_down = int((sig["log2FoldChange"] < 0).sum())
     metrics = {
-        "dataset": "GSE104406 (Adelman 2019, human HSC, young vs old)",
+        "dataset": "GSE104704 (Nativio et al., human brain, healthy young vs old)",
         "n_samples": int(counts_t.shape[0]),
         "n_genes_tested": int(res["padj"].notna().sum()),
         "padj_cutoff": PADJ_CUTOFF,

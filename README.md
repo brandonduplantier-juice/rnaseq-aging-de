@@ -1,20 +1,21 @@
 # RNA-seq Aging DE: young vs old hematopoietic stem cells
 
-Differential gene expression between young and old human hematopoietic stem cells
-(HSCs), using the standard DESeq2 workflow. Built as a portfolio bioinformatics
+Differential gene expression between healthy young and healthy old human brain
+(prefrontal cortex), using the standard DESeq2 workflow. Built as a portfolio bioinformatics
 project: it takes a published aging dataset from raw counts to an annotated list
 of differentially expressed genes and the three figures that always accompany a
 DE analysis (PCA, volcano, heatmap).
 
 ## Dataset
 
-GSE104406 (Adelman et al. 2019, Cancer Discovery). FACS-sorted bone-marrow HSCs,
-bulk RNA-seq, 10 young donors (ages 18 to 30) versus 10 aged donors (ages 65 to
-75). A balanced two-group design.
+GSE104704 (Nativio et al.). Human prefrontal cortex, bulk RNA-seq, healthy young
+versus healthy aged donors. The series also contains an Alzheimer's group, which
+the loader drops so this is a clean healthy-aging comparison.
 
-Counts come from NCBI's uniformly processed RNA-seq count matrices, so no read
-alignment is required. Sample group labels are parsed from the GEO series matrix
-at runtime, not hardcoded.
+GEO stores counts inconsistently, so the loader tries NCBI's uniformly processed
+counts first, then falls back to auto-discovering a raw-counts file in the series'
+own supplementary directory, and prints what it finds either way. Sample group
+labels are parsed from the GEO series matrix at runtime, not hardcoded.
 
 ## Method
 
