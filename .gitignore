@@ -1,0 +1,9 @@
+# raw downloads and large intermediates
+data/raw/
+data/*.csv
+data/*.gz
+# python noise
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
