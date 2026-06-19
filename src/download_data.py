@@ -48,8 +48,8 @@ def stub(acc):
 
 NCBI_COUNTS_URL = ("https://www.ncbi.nlm.nih.gov/geo/download/?type=rnaseq_counts"
                    "&acc={a}&format=file&file={a}_raw_counts_GRCh38.p13_NCBI.tsv.gz").format(a=ACC)
-NCBI_ANNOT_URL = ("https://www.ncbi.nlm.nih.gov/geo/download/?type=rnaseq_counts"
-                  "&acc={a}&format=file&file=Human.GRCh38.p13.annot.tsv.gz").format(a=ACC)
+NCBI_ANNOT_URL = ("https://www.ncbi.nlm.nih.gov/geo/download/?format=file"
+                  "&type=rnaseq_counts&file=Human.GRCh38.p13.annot.tsv.gz")
 SUPPL_URL = "https://ftp.ncbi.nlm.nih.gov/geo/series/{s}/{a}/suppl/".format(s=stub(ACC), a=ACC)
 SERIES_URL = ("https://ftp.ncbi.nlm.nih.gov/geo/series/{s}/{a}/matrix/"
               "{a}_series_matrix.txt.gz").format(s=stub(ACC), a=ACC)
@@ -143,17 +143,19 @@ def read_counts_bytes(data, fname):
 def attach_symbols(counts):
     """Build gene_id -> symbol. Entrez IDs map via NCBI annotation; else id=symbol."""
     idx = counts.index.astype(str)
+    fallback = pd.Series(idx.values, index=idx)  # use the ID if no symbol is found
     if idx.str.fullmatch(r"\d+").mean() > 0.8:  # Entrez gene IDs
         print("[download] gene IDs look like Entrez; downloading annotation for symbols")
         ann = http_get(NCBI_ANNOT_URL)
         if ann is not None:
             annot = pd.read_csv(io.BytesIO(gzip.decompress(ann)), sep="\t", index_col=0)
             annot.index = annot.index.astype(str)
-            col = "Symbol" if "Symbol" in annot.columns else annot.columns[0]
+            sym_cols = [c for c in annot.columns if "symbol" in c.lower()]
+            col = sym_cols[0] if sym_cols else annot.columns[0]
             sym = annot[col].reindex(idx)
-            return pd.DataFrame({"symbol": sym.values}, index=idx)
-    # Ensembl or already-symbol: use the ID itself as the label.
-    return pd.DataFrame({"symbol": idx}, index=idx)
+            sym = sym.where(sym.notna(), fallback)
+            return pd.DataFrame({"symbol": sym.astype(str).values}, index=idx)
+    return pd.DataFrame({"symbol": fallback.astype(str).values}, index=idx)
 
 
 def main():

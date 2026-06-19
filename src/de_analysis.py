@@ -87,7 +87,7 @@ def main():
         "n_significant": int(len(sig)),
         "n_up_in_old": n_up,
         "n_down_in_old": n_down,
-        "top_genes": sig.head(15)["symbol"].dropna().tolist(),
+        "top_genes": sig.head(15)["symbol"].dropna().astype(str).tolist(),
     }
     with open(os.path.join(RESULTS_DIR, "metrics.json"), "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
