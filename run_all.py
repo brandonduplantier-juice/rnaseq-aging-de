@@ -9,6 +9,8 @@ import os
 import runpy
 import sys
 
+__version__ = "1.1.0"
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "src")
 DATA = os.path.join(HERE, "data", "counts.csv")
@@ -20,6 +22,7 @@ def run(stage):
 
 
 def main():
+    print("[run_all] rnaseq-aging-de v{}".format(__version__))
     if os.path.exists(DATA) and "--force-download" not in sys.argv:
         print("[run_all] data/counts.csv exists, skipping download "
               "(pass --force-download to refetch)")
@@ -27,6 +30,8 @@ def main():
         run("download_data.py")
     run("de_analysis.py")
     run("plots.py")
+    if "--enrichment" in sys.argv:
+        run("enrichment.py")
     print("\n[run_all] done. See results/ for the table, metrics, and plots.")
 
 

@@ -1,3 +1,10 @@
+# core pipeline
 pydeseq2==0.5.4
 pandas>=2.0,<3.0
+numpy>=1.24
 matplotlib>=3.7
+# pathway enrichment, needs internet (src/enrichment.py)
+gseapy>=1.1
+# interactive explorer (app.py)
+streamlit>=1.30
+plotly>=5.18

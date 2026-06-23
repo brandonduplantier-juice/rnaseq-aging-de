@@ -4,6 +4,7 @@ Plots for the young-versus-old DE analysis.
 Outputs:
   results/pca.png       sample PCA on normalized counts, colored by group
   results/volcano.png   log2 fold change vs significance, DE genes highlighted
+  results/ma_plot.png   mean expression vs fold change, significant genes in red
   results/heatmap.png   z-scored expression of the top DE genes across samples
 
 Reads results/de_results.csv, data/normalized_counts.csv, data/meta.csv.
@@ -53,7 +54,7 @@ def main():
                    color=COLORS[grp], label=grp, edgecolor="white")
     ax.set_xlabel("PC1 ({:.1f}% var)".format(var_explained[0]))
     ax.set_ylabel("PC2 ({:.1f}% var)".format(var_explained[1]))
-    ax.set_title("Sample PCA: young vs old HSCs")
+    ax.set_title("Sample PCA: young vs old human cortex")
     ax.legend()
     fig.tight_layout()
     fig.savefig(os.path.join(RESULTS_DIR, "pca.png"), dpi=150)
@@ -103,7 +104,32 @@ def main():
     fig.savefig(os.path.join(RESULTS_DIR, "heatmap.png"), dpi=150)
     plt.close(fig)
 
-    print("[plots] wrote results/pca.png, results/volcano.png, results/heatmap.png")
+    # ---- MA plot: mean expression vs fold change ----
+    m = res.dropna(subset=["padj", "log2FoldChange", "baseMean"]).copy()
+    m = m[m["baseMean"] > 0]
+    msig = m["padj"] < PADJ_CUTOFF
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.scatter(np.log10(m.loc[~msig, "baseMean"]), m.loc[~msig, "log2FoldChange"],
+               s=7, alpha=0.35, color="#bdbdbd", edgecolor="none", label="ns")
+    ax.scatter(np.log10(m.loc[msig, "baseMean"]), m.loc[msig, "log2FoldChange"],
+               s=12, alpha=0.75, color="#cb181d", edgecolor="none",
+               label="padj < {}".format(PADJ_CUTOFF))
+    ax.axhline(0, color="black", lw=0.8)
+    top_ma = m.loc[msig].reindex(
+        m.loc[msig, "log2FoldChange"].abs().sort_values(ascending=False).index).head(6)
+    for _, row in top_ma.iterrows():
+        ax.annotate(str(row["symbol"]),
+                    (np.log10(row["baseMean"]), row["log2FoldChange"]),
+                    fontsize=7, xytext=(3, 2), textcoords="offset points")
+    ax.set_xlabel("log10 mean expression (baseMean)")
+    ax.set_ylabel("log2 fold change (old vs young)")
+    ax.set_title("MA plot: expression level vs fold change with age")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(RESULTS_DIR, "ma_plot.png"), dpi=150)
+    plt.close(fig)
+
+    print("[plots] wrote results/pca.png, results/volcano.png, results/ma_plot.png, results/heatmap.png")
 
 
 if __name__ == "__main__":
