@@ -92,6 +92,23 @@ with st.expander("New here? How to read this", expanded=False):
         "interesting ones."
     )
 
+with st.expander("Key terms"):
+    st.markdown(
+        "- **Gene**: an instruction in your DNA. At any moment a cell only runs some of "
+        "them.\n"
+        "- **Gene expression**: how active a gene is, how loudly it is being run.\n"
+        "- **RNA-seq**: a technology that measures the activity of every gene in a tissue "
+        "sample at once.\n"
+        "- **Differential expression**: finding genes whose activity differs between two "
+        "groups, here young vs old brain, beyond random noise.\n"
+        "- **Fold change**: how much louder or quieter a gene gets. Negative means lower "
+        "in old age, positive means higher.\n"
+        "- **Adjusted p-value (FDR)**: how confident a change is real after testing "
+        "thousands of genes at once. Below 0.05 is the usual bar for significant.\n"
+        "- **Significant gene**: one that clears that bar, a real age change rather than "
+        "chance."
+    )
+
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Genes tested", "{:,}".format(meta["n_genes_tested"]),
           help="Genes with enough signal to test for an age difference.")
