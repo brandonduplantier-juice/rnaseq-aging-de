@@ -110,3 +110,8 @@ consistent with known brain aging, not as discoveries.
 
 Data: GSE104704 (Nativio et al., human brain). Method: Love et al., DESeq2, Genome
 Biol 2014. Research and portfolio project.
+
+## Project navigation
+
+- [Engineering guide](ENGINEERING.md): directory map, development workflow and review standards.
+- [Documentation index](DOCUMENTATION.md): technical documents and existing project resources.
